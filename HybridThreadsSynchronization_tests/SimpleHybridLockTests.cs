@@ -41,6 +41,7 @@ namespace HybridThreadsSynchronization_tests
 		{
 			const int threadsCount = 5;
 
+			var @lock = new SimpleHybridLock();
 			var sharedArray = new int[threadsCount];
 			int sharedCurrentArrayIndex = 0;
 
@@ -60,9 +61,12 @@ namespace HybridThreadsSynchronization_tests
 
 			void DoWork()
 			{
-				sharedArray[sharedCurrentArrayIndex] = 5;
-				sharedCurrentArrayIndex++;
-				Thread.Sleep(5);
+				using (@lock.WaitForAccess())
+				{
+					sharedArray[sharedCurrentArrayIndex] = 5;
+					sharedCurrentArrayIndex++;
+					Thread.Sleep(5);
+				}
 			}
 		}
 	}
