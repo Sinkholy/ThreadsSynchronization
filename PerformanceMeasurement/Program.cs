@@ -1,6 +1,6 @@
-﻿using System.Diagnostics;
+﻿using HybridThreadsSynchronization.ThreadsSynchronizer;
 
-using HybridThreadsSynchronization.ThreadsSynchronizer;
+using PerformanceMeasurement;
 
 var performanceTester = new SimpleIncrementPerformanceMeasurement();
 var defaultPerformance = performanceTester.MeasureDefaultPerformance();
@@ -17,41 +17,31 @@ Console.Read();
 
 class SimpleIncrementPerformanceMeasurement
 {
+	const int iterations = 100000;
+	const int samplesCount = 50;
+
 	public TimeSpan MeasureDefaultPerformance()
 	{
-		const int iterations = 100000;
-		const int samplesCount = 50;
-		var sw = new Stopwatch();
-		var measurements = new TimeSpan[samplesCount];
+		return Benchmark.Run(DefaultIncrement, samplesCount);
 
-		for (int i = 0; i < samplesCount; i++)
+		void DefaultIncrement()
 		{
 			int x = 0;
-			sw.Restart();
-			
 			while (x < iterations)
 			{
 				x++;
 			}
-
-			measurements[i] = sw.Elapsed;
 		}
-
-		return CalculateAverageTimeSpan(measurements);
 	}
 	public TimeSpan MeasureSimpleHybridLockPerformance()
 	{
-		const int iterations = 100000;
-		const int samplesCount = 50;
 		var @lock = new SimpleHybridLock();
-		var sw = new Stopwatch();
-		var measurements = new TimeSpan[samplesCount];
 
-		for (int i = 0; i < samplesCount; i++)
+		return Benchmark.Run(Increment, samplesCount);
+
+		void Increment()
 		{
 			int x = 0;
-			sw.Restart();
-
 			while (x < iterations)
 			{
 				using (@lock.WaitForAccess())
@@ -59,19 +49,6 @@ class SimpleIncrementPerformanceMeasurement
 					x++;
 				}
 			}
-
-			measurements[i] = sw.Elapsed;
 		}
-
-		return CalculateAverageTimeSpan(measurements);
-	}
-	TimeSpan CalculateAverageTimeSpan(ICollection<TimeSpan> samples)
-	{
-		var total = new TimeSpan();
-		foreach (var sample in samples)
-		{
-			total += sample;
-		}
-		return total / samples.Count;
 	}
 }
