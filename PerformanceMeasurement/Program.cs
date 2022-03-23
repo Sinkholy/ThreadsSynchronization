@@ -2,47 +2,46 @@
 
 using PerformanceMeasurement;
 
-var performanceTester = new SimpleIncrementPerformanceMeasurement();
-var defaultPerformance = performanceTester.MeasureDefaultPerformance();
-var simpleHybridLockPerformance = performanceTester.MeasureSimpleHybridLockPerformance();
+var @default = IncrementBenchmark.BenchmarkDefault();
+var shl = IncrementBenchmark.BenchmarkSimpleHybridLock();
 
-Console.WriteLine($"Default performance: {defaultPerformance}");
-Console.WriteLine($"SimpleHybridLock performance: {simpleHybridLockPerformance}");
+Console.WriteLine($"Default performance: {@default}");
+Console.WriteLine($"SimpleHybridLock performance: {shl}");
 
-var ratio = simpleHybridLockPerformance / defaultPerformance;
+var ratio = shl / @default;
 
 Console.WriteLine($"Default performance was x{Math.Round(ratio, 1)} faster.");
 
 Console.Read();
 
-class SimpleIncrementPerformanceMeasurement
+class IncrementBenchmark
 {
-	const int iterations = 100000;
-	const int samplesCount = 50;
+	const int incrementIterations = 100000;
+	const int benchmarkIterations = 50;
 
-	public TimeSpan MeasureDefaultPerformance()
+	public static TimeSpan BenchmarkDefault()
 	{
-		return Benchmark.Run(DefaultIncrement, samplesCount);
+		return Benchmark.Run(DefaultIncrement, benchmarkIterations);
 
 		void DefaultIncrement()
 		{
 			int x = 0;
-			while (x < iterations)
+			while (x < incrementIterations)
 			{
 				x++;
 			}
 		}
 	}
-	public TimeSpan MeasureSimpleHybridLockPerformance()
+	public static TimeSpan BenchmarkSimpleHybridLock()
 	{
 		var @lock = new SimpleHybridLock();
 
-		return Benchmark.Run(Increment, samplesCount);
+		return Benchmark.Run(Increment, benchmarkIterations);
 
 		void Increment()
 		{
 			int x = 0;
-			while (x < iterations)
+			while (x < incrementIterations)
 			{
 				using (@lock.WaitForAccess())
 				{
