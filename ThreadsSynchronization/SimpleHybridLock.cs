@@ -21,7 +21,6 @@
                 {
                     EnqueueForAccess();
                 }
-
                 return new Access(this);
 
                 void EnqueueForAccess()
@@ -42,6 +41,7 @@
                         {
                             Interlocked.Increment(ref threadsWaitingForEvent);
                             ARE.WaitOne();
+                            Interlocked.Decrement(ref threadsWaitingForEvent);
                         }
                     }
                 }
