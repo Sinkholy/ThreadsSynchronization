@@ -1,4 +1,6 @@
-﻿namespace HybridThreadsSynchronization
+﻿using System.Runtime.InteropServices;
+
+namespace HybridThreadsSynchronization
 {
     namespace ThreadsSynchronizer
     {
@@ -55,7 +57,12 @@
                 }
             }
 
-            public class Access : IDisposable
+            [StructLayout(LayoutKind.Auto)] // Т.к. эта структура никак напрямую не взаимодействует с НУ(неуправляемый код)
+                                            // я решил отдать на откуп компилятора расположение элементов
+                                            // ибо это может привести к некоторым оптимизациям.
+                                            // По умолчанию структуры никак не оптимизируются в контексте расположения элементов
+                                            // т.к. идет рассчет на то, что они будут взаимодействовать с НУ (LayoutKind == Sequential).
+            public struct Access : IDisposable
             {
                 readonly SimpleHybridLock synchronizer;
 
